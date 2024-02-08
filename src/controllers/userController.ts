@@ -45,12 +45,12 @@ export const createUser = (req: IncomingMessage, res: ServerResponse) => {
 
   req.on('end', () => {
     const parsedBody = JSON.parse(body);
-    const { username, age, hobbies = [] } = parsedBody;
+    const { username, age, hobbies } = parsedBody;
 
-    if (!username || !age) {
+    if (!username || !age || !hobbies) {
       res.statusCode = 400;
       res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify({ message: 'Request body must contain username and age' }));
+      res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
       res.end();
       return;
     }
@@ -90,12 +90,12 @@ export const updateUser = (req: IncomingMessage, res: ServerResponse) => {
 
     req.on('end', () => {
       const parsedBody = JSON.parse(body);
-      const { username, age, hobbies = [] } = parsedBody;
+      const { username, age, hobbies } = parsedBody;
 
-      if (!username || !age) {
+      if (!username || !age || !hobbies) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify({ message: 'Request body must contain username and age' }));
+        res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
         res.end();
         return;
       }
@@ -121,12 +121,25 @@ export const updateUser = (req: IncomingMessage, res: ServerResponse) => {
 };
 
 export const deleteUser = (req: IncomingMessage, res: ServerResponse) => {
-  // const {
-  //   params: { userId },
-  // } = req;
-  // if (!userId) {
-  //   return;
-  // }
-  // userService.deleteUser(userId);
-  // res.status(204).send({ status: 'OK' });
+  const userId = req.url!.split('/')[3];
+
+  if (userService.getUser(userId)) {
+    // TODO temporary commented out
+    // if (!validate(userId)) {
+    //   res.statusCode = 400;
+    //   res.write(`Invalid userId: ${userId}`);
+    //   res.end();
+    //   return;
+    // }
+
+    userService.deleteUser(userId);
+
+    res.statusCode = 204;
+    res.write(`User ${userId} deleted successfully`);
+    res.end();
+  } else {
+    res.statusCode = 404;
+    res.write(`User with id ${userId} not found`);
+    res.end();
+  }
 };

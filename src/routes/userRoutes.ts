@@ -32,3 +32,13 @@ export const userPut = (request: IncomingMessage, response: ServerResponse) => {
     response.end();
   }
 };
+
+export const userDelete = (request: IncomingMessage, response: ServerResponse) => {
+  if (request.url?.startsWith('/api/users/')) {
+    userController.deleteUser(request, response);
+  } else {
+    response.statusCode = 400;
+    response.write(`CANNOT DELETE ${request.url}`);
+    response.end();
+  }
+};

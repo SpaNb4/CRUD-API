@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { userGet, userPost, userPut } from './routes/userRoutes';
+import { userDelete, userGet, userPost, userPut } from './routes/userRoutes';
 
 const server = http.createServer((request, response) => {
   switch (request.method) {
@@ -15,12 +15,11 @@ const server = http.createServer((request, response) => {
       userPut(request, response);
       break;
 
-    // case 'DELETE':
-    //   deleteR(request, response);
-    //   break;
+    case 'DELETE':
+      userDelete(request, response);
+      break;
 
     default:
-      // Send response for requests with no other response
       response.statusCode = 400;
       response.write('No Response');
       response.end();
