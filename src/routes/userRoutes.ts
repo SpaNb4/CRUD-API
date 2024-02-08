@@ -22,3 +22,13 @@ export const userPost = (request: IncomingMessage, response: ServerResponse) => 
     response.end();
   }
 };
+
+export const userPut = (request: IncomingMessage, response: ServerResponse) => {
+  if (request.url?.startsWith('/api/users/')) {
+    userController.updateUser(request, response);
+  } else {
+    response.statusCode = 400;
+    response.write(`CANNOT PUT ${request.url}`);
+    response.end();
+  }
+};

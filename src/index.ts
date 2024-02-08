@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { userGet, userPost } from './routes/userRoutes';
+import { userGet, userPost, userPut } from './routes/userRoutes';
 
 const server = http.createServer((request, response) => {
   switch (request.method) {
@@ -11,9 +11,9 @@ const server = http.createServer((request, response) => {
       userPost(request, response);
       break;
 
-    // case 'PUT':
-    //   put(request, response);
-    //   break;
+    case 'PUT':
+      userPut(request, response);
+      break;
 
     // case 'DELETE':
     //   deleteR(request, response);

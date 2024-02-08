@@ -16,12 +16,6 @@ export const getUser = (userId: User['id']) => {
 };
 
 export const createUser = (newUser: User) => {
-  const isAlreadyAdded = DB.users.findIndex((user) => user.username === newUser.username) > -1;
-
-  if (isAlreadyAdded) {
-    return;
-  }
-
   DB.users.push(newUser);
 
   return newUser;
