@@ -20,6 +20,7 @@ export const getUser = (req: IncomingMessage, res: ServerResponse) => {
     res.setHeader('Content-Type', 'application/json');
     res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
     res.end();
+    return;
   }
 
   const user = userService.getUser(userId);
@@ -53,6 +54,7 @@ export const createUser = (req: IncomingMessage, res: ServerResponse) => {
       res.setHeader('Content-Type', 'application/json');
       res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
       res.end();
+      return;
     }
 
     const newUser: Partial<User> = {
@@ -79,6 +81,7 @@ export const updateUser = (req: IncomingMessage, res: ServerResponse) => {
       res.setHeader('Content-Type', 'application/json');
       res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
       res.end();
+      return;
     }
 
     let body = '';
@@ -93,9 +96,11 @@ export const updateUser = (req: IncomingMessage, res: ServerResponse) => {
 
       if (!username || !age || !hobbies) {
         res.statusCode = 400;
+        console.log('2222');
         res.setHeader('Content-Type', 'application/json');
         res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
         res.end();
+        return;
       }
 
       const changes: Partial<User> = {
@@ -128,6 +133,7 @@ export const deleteUser = (req: IncomingMessage, res: ServerResponse) => {
       res.setHeader('Content-Type', 'application/json');
       res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
       res.end();
+      return;
     }
 
     userService.deleteUser(userId);

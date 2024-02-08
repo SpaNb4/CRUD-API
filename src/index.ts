@@ -3,7 +3,7 @@ import http from 'node:http';
 import { userDelete, userGet, userPost, userPut } from './routes/userRoutes';
 import { routeNotFound } from './utils';
 
-const server = http.createServer((request, response) => {
+export const server = http.createServer((request, response) => {
   try {
     switch (request.method) {
       case 'GET':

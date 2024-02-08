@@ -3,15 +3,13 @@ import { User } from '../models/userModel';
 
 export const users: User[] = [
   {
-    // id: uuidv4(),
-    id: '1',
+    id: uuidv4(),
     username: 'John',
     age: 25,
     hobbies: ['reading', 'gaming'],
   },
   {
-    // id: uuidv4(),
-    id: '2',
+    id: uuidv4(),
     username: 'Jane',
     age: 30,
     hobbies: ['painting'],
