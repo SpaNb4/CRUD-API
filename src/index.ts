@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { userDelete, userGet, userPost, userPut } from './routes/userRoutes';
+import { routeNotFound } from './utils';
 
 const server = http.createServer((request, response) => {
   try {
@@ -21,13 +22,12 @@ const server = http.createServer((request, response) => {
         break;
 
       default:
-        response.statusCode = 400;
-        response.write('No Response');
-        response.end();
+        routeNotFound(request, response);
     }
   } catch (err) {
     response.statusCode = 500;
-    response.write(`Internal Server Error: ${(err as Error).message}`);
+    response.setHeader('Content-Type', 'application/json');
+    response.write(JSON.stringify({ message: `Internal Server Error: ${(err as Error).message}` }));
     response.end();
   }
 });
