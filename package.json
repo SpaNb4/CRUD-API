@@ -13,6 +13,8 @@
   "author": "Dzmitry Yarmoshkin",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.56.0",
@@ -21,5 +23,8 @@
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }
