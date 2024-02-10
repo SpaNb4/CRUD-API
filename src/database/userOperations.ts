@@ -1,7 +1,11 @@
 import { User } from '../models/userModel';
 import * as DB from './db';
+import { sendUpdatedDB } from '../loadBalancer/sendUpdatedDB';
 
 export const getUsers = () => {
+  if (process.env.MULTI) {
+    sendUpdatedDB(DB.users);
+  }
   return DB.users;
 };
 
@@ -12,11 +16,19 @@ export const getUser = (userId: User['id']) => {
     return;
   }
 
+  if (process.env.MULTI) {
+    sendUpdatedDB(DB.users);
+  }
+
   return user;
 };
 
 export const createUser = (newUser: User) => {
   DB.users.push(newUser);
+
+  if (process.env.MULTI) {
+    sendUpdatedDB(DB.users);
+  }
 
   return newUser;
 };
@@ -28,14 +40,18 @@ export const updateUser = (userId: User['id'], changes: Partial<User>) => {
     return;
   }
 
-  const updatedWorkout = {
+  const updatedUser = {
     ...DB.users[indexForUpdate],
     ...changes,
   };
 
-  DB.users[indexForUpdate] = updatedWorkout;
+  DB.users[indexForUpdate] = updatedUser;
 
-  return updatedWorkout;
+  if (process.env.MULTI) {
+    sendUpdatedDB(DB.users);
+  }
+
+  return updatedUser;
 };
 
 export const deleteUser = (userId: User['id']) => {
@@ -46,4 +62,8 @@ export const deleteUser = (userId: User['id']) => {
   }
 
   DB.users.splice(indexForDeletion, 1);
+
+  if (process.env.MULTI) {
+    sendUpdatedDB(DB.users);
+  }
 };

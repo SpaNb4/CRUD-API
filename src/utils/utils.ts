@@ -6,3 +6,4 @@ export const routeNotFound = (request: IncomingMessage, response: ServerResponse
   response.write(JSON.stringify({ message: `${request.method} route ${request.url} not found` }));
   response.end();
 };
+

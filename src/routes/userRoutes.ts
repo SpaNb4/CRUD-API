@@ -1,46 +1,102 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import * as userController from '../controllers/userController';
-import { routeNotFound } from '../utils';
+import { forwardRequest } from '../loadBalancer/forwardRequest';
+import { routeNotFound } from '../utils/utils';
+
+export const routes = (request: IncomingMessage, response: ServerResponse) => {
+  try {
+    switch (request.method) {
+      case 'GET':
+        userGet(request, response);
+        break;
+
+      case 'POST':
+        userPost(request, response);
+        break;
+
+      case 'PUT':
+        userPut(request, response);
+        break;
+
+      case 'DELETE':
+        userDelete(request, response);
+        break;
+
+      default:
+        routeNotFound(request, response);
+    }
+  } catch (err) {
+    response.writeHead(500, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: `Internal Server Error: ${(err as Error).message}` }));
+  }
+};
 
 export const userGet = (request: IncomingMessage, response: ServerResponse) => {
   if (request.url === '/api/users') {
-    userController.getUsers(request, response);
-  } else if (request.url?.startsWith('/api/users/')) {
-    userController.getUser(request, response);
-  } else if (request.url?.startsWith('/api/heavy')) {
-    let total = 0;
-    for (let i = 0; i < 20_000_000; i++) {
-      total++;
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      forwardRequest(request, response);
+    } else {
+      userController.getUsers(request, response);
     }
-    response.statusCode = 200;
-    response.setHeader('Content-Type', 'application/json');
-    response.write(`The result of the CPU intensive task is ${total}\n`);
-    response.end();
+  } else if (request.url?.startsWith('/api/users/')) {
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      forwardRequest(request, response);
+    } else {
+      userController.getUser(request, response);
+    }
   } else {
-    routeNotFound(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      routeNotFound(request, response);
+    } else {
+      routeNotFound(request, response);
+    }
   }
 };
 
 export const userPost = (request: IncomingMessage, response: ServerResponse) => {
   if (request.url === '/api/users') {
-    userController.createUser(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      forwardRequest(request, response);
+    } else {
+      userController.createUser(request, response);
+    }
   } else {
-    routeNotFound(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      routeNotFound(request, response);
+    } else {
+      routeNotFound(request, response);
+    }
   }
 };
 
 export const userPut = (request: IncomingMessage, response: ServerResponse) => {
   if (request.url?.startsWith('/api/users/')) {
-    userController.updateUser(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      forwardRequest(request, response);
+    } else {
+      userController.updateUser(request, response);
+    }
   } else {
-    routeNotFound(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      routeNotFound(request, response);
+    } else {
+      routeNotFound(request, response);
+    }
   }
 };
 
 export const userDelete = (request: IncomingMessage, response: ServerResponse) => {
   if (request.url?.startsWith('/api/users/')) {
-    userController.deleteUser(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      forwardRequest(request, response);
+    } else {
+      userController.deleteUser(request, response);
+    }
   } else {
-    routeNotFound(request, response);
+    if (process.env.MULTI && request.socket.localPort === 4000) {
+      routeNotFound(request, response);
+    } else {
+      routeNotFound(request, response);
+    }
   }
 };

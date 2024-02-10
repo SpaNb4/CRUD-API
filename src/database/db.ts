@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../models/userModel';
 
-export const users: User[] = [
+export let users: User[] = [
   {
     id: uuidv4(),
     username: 'John',
@@ -33,3 +33,14 @@ export const users: User[] = [
     hobbies: ['photography', 'hiking'],
   },
 ];
+
+interface Message {
+  type: string;
+  data: User[];
+}
+
+export const handleMessage = (message: Message) => {
+  if (message && message.type === 'updatedDB') {
+    users = message.data;
+  }
+};
