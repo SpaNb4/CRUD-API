@@ -1,12 +1,15 @@
 import http, { IncomingMessage, RequestOptions, ServerResponse } from 'node:http';
 import { numCPUs } from './cluster';
+import { LOAD_BALANCER_PORT } from './createServer';
 
 let currentServerIndex = 1;
 
 export const forwardRequest = (req: IncomingMessage, res: ServerResponse) => {
+  console.log('Forwarding request to server', currentServerIndex);
+
   const options: RequestOptions = {
     hostname: 'localhost',
-    port: 4000 + currentServerIndex,
+    port: LOAD_BALANCER_PORT + currentServerIndex,
     path: req.url,
     method: req.method,
     headers: req.headers,

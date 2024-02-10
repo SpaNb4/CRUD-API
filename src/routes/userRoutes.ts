@@ -1,4 +1,5 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import cluster from 'node:cluster';
+import { IncomingMessage, ServerResponse } from 'node:http';
 import * as userController from '../controllers/userController';
 import { forwardRequest } from '../loadBalancer/forwardRequest';
 import { routeNotFound } from '../utils/utils';
@@ -32,71 +33,43 @@ export const routes = (request: IncomingMessage, response: ServerResponse) => {
 };
 
 export const userGet = (request: IncomingMessage, response: ServerResponse) => {
-  if (request.url === '/api/users') {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      forwardRequest(request, response);
-    } else {
-      userController.getUsers(request, response);
-    }
+  if (process.env.MULTI && cluster.isPrimary) {
+    forwardRequest(request, response);
+  } else if (request.url === '/api/users') {
+    userController.getUsers(request, response);
   } else if (request.url?.startsWith('/api/users/')) {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      forwardRequest(request, response);
-    } else {
-      userController.getUser(request, response);
-    }
+    userController.getUser(request, response);
   } else {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      routeNotFound(request, response);
-    } else {
-      routeNotFound(request, response);
-    }
+    routeNotFound(request, response);
   }
 };
 
 export const userPost = (request: IncomingMessage, response: ServerResponse) => {
-  if (request.url === '/api/users') {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      forwardRequest(request, response);
-    } else {
-      userController.createUser(request, response);
-    }
+  if (process.env.MULTI && cluster.isPrimary) {
+    forwardRequest(request, response);
+  } else if (request.url === '/api/users') {
+    userController.createUser(request, response);
   } else {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      routeNotFound(request, response);
-    } else {
-      routeNotFound(request, response);
-    }
+    routeNotFound(request, response);
   }
 };
 
 export const userPut = (request: IncomingMessage, response: ServerResponse) => {
-  if (request.url?.startsWith('/api/users/')) {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      forwardRequest(request, response);
-    } else {
-      userController.updateUser(request, response);
-    }
+  if (process.env.MULTI && cluster.isPrimary) {
+    forwardRequest(request, response);
+  } else if (request.url?.startsWith('/api/users/')) {
+    userController.updateUser(request, response);
   } else {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      routeNotFound(request, response);
-    } else {
-      routeNotFound(request, response);
-    }
+    routeNotFound(request, response);
   }
 };
 
 export const userDelete = (request: IncomingMessage, response: ServerResponse) => {
-  if (request.url?.startsWith('/api/users/')) {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      forwardRequest(request, response);
-    } else {
-      userController.deleteUser(request, response);
-    }
+  if (process.env.MULTI && cluster.isPrimary) {
+    forwardRequest(request, response);
+  } else if (request.url?.startsWith('/api/users/')) {
+    userController.deleteUser(request, response);
   } else {
-    if (process.env.MULTI && request.socket.localPort === 4000) {
-      routeNotFound(request, response);
-    } else {
-      routeNotFound(request, response);
-    }
+    routeNotFound(request, response);
   }
 };
