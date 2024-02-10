@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { server } from '../src';
 
-jest.mock('../src/database/DB', () => ({
+jest.mock('../src/database/db', () => ({
   users: [
     {
       id: '19931501-a044-4bbd-be35-47dd32edc68a',
