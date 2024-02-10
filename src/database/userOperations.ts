@@ -1,5 +1,5 @@
 import { User } from '../models/userModel';
-import * as DB from './DB';
+import * as DB from './db';
 
 export const getUsers = () => {
   return DB.users;
