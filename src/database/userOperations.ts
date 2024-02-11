@@ -6,6 +6,7 @@ export const getUsers = () => {
   if (process.env.MULTI) {
     sendUpdatedDB(DB.users);
   }
+
   return DB.users;
 };
 

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as userOperations from '../database/userOperations';
-import { User } from '../models/userModel';
+import { User, UserWithoutId } from '../models/userModel';
 
 export const getUsers = () => {
   const users = userOperations.getUsers();
@@ -12,11 +12,11 @@ export const getUser = (userId: User['id']) => {
   return user;
 };
 
-export const createUser = (newUser: Partial<User>) => {
+export const createUser = (newUser: UserWithoutId) => {
   const userInsert = {
-    ...newUser,
     id: uuidv4(),
-  } as User;
+    ...newUser,
+  };
 
   const createdUser = userOperations.createUser(userInsert);
   return createdUser;

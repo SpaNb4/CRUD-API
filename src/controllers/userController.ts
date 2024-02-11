@@ -1,8 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { validate } from 'uuid';
-import { User } from '../models/userModel';
+import { User, UserWithoutId } from '../models/userModel';
 import * as userService from '../services/userService';
-import { StatusCode } from '../types';
+import { ErrorMessages, StatusCode } from '../types';
 import { getUserIdFromUrl, parseRequestBody, sendResponse } from '../utils/utils';
 
 export const getUsers = (_req: IncomingMessage, res: ServerResponse) => {
@@ -15,12 +15,12 @@ export const getUser = (req: IncomingMessage, res: ServerResponse) => {
   const userId = getUserIdFromUrl(req.url);
 
   if (!userId) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: ErrorMessages.InvalidRequestUrl });
     return;
   }
 
   if (!validate(userId)) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: `Invalid userId: ${userId}` });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: `${ErrorMessages.InvalidUserId}: ${userId}` });
     return;
   }
 
@@ -40,22 +40,22 @@ export const createUser = async (req: IncomingMessage, res: ServerResponse) => {
 
     if (!username || !age || !hobbies) {
       sendResponse(res, StatusCode.BAD_REQUEST, {
-        message: 'Request body must contain username, age, and hobbies',
+        message: ErrorMessages.MissingFields,
       });
       return;
     }
 
-    const newUser: Partial<User> = {
-      username: username,
-      age: age,
-      hobbies: hobbies,
+    const newUser: UserWithoutId = {
+      username,
+      age,
+      hobbies,
     };
 
     const createdUser = userService.createUser(newUser);
 
-    sendResponse(res, StatusCode.OK, createdUser);
+    sendResponse(res, StatusCode.CREATED, createdUser);
   } catch (error) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request body' });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: ErrorMessages.InvalidRequestBody });
   }
 };
 
@@ -64,7 +64,12 @@ export const updateUser = async (req: IncomingMessage, res: ServerResponse) => {
     const userId = getUserIdFromUrl(req.url);
 
     if (!userId) {
-      sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
+      sendResponse(res, StatusCode.BAD_REQUEST, { message: ErrorMessages.InvalidRequestUrl });
+      return;
+    }
+
+    if (!validate(userId)) {
+      sendResponse(res, StatusCode.BAD_REQUEST, { message: `${ErrorMessages.InvalidUserId}: ${userId}` });
       return;
     }
 
@@ -80,7 +85,7 @@ export const updateUser = async (req: IncomingMessage, res: ServerResponse) => {
 
     if (!username || !age || !hobbies) {
       sendResponse(res, StatusCode.BAD_REQUEST, {
-        message: 'Request body must contain username, age, and hobbies',
+        message: ErrorMessages.MissingFields,
       });
       return;
     }
@@ -95,7 +100,7 @@ export const updateUser = async (req: IncomingMessage, res: ServerResponse) => {
 
     sendResponse(res, StatusCode.OK, updatedUser);
   } catch (error) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request body' });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: ErrorMessages.InvalidRequestBody });
   }
 };
 
@@ -103,12 +108,12 @@ export const deleteUser = (req: IncomingMessage, res: ServerResponse) => {
   const userId = getUserIdFromUrl(req.url);
 
   if (!userId) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: ErrorMessages.InvalidRequestUrl });
     return;
   }
 
   if (!validate(userId)) {
-    sendResponse(res, StatusCode.BAD_REQUEST, { message: `Invalid userId: ${userId}` });
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: `${ErrorMessages.InvalidUserId}: ${userId}` });
     return;
   }
 
@@ -121,5 +126,5 @@ export const deleteUser = (req: IncomingMessage, res: ServerResponse) => {
 
   userService.deleteUser(userId);
 
-  sendResponse(res, StatusCode.OK, { message: `User ${userId} deleted successfully` });
+  sendResponse(res, StatusCode.DELETED, { message: `User ${userId} deleted successfully` });
 };
