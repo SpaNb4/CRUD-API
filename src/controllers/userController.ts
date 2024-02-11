@@ -2,58 +2,46 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { validate } from 'uuid';
 import { User } from '../models/userModel';
 import * as userService from '../services/userService';
+import { StatusCode } from '../types';
+import { getUserIdFromUrl, parseRequestBody, sendResponse } from '../utils/utils';
 
 export const getUsers = (_req: IncomingMessage, res: ServerResponse) => {
   const users = userService.getUsers();
 
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/json');
-  res.write(JSON.stringify(users));
-  res.end();
+  sendResponse(res, StatusCode.OK, users);
 };
 
 export const getUser = (req: IncomingMessage, res: ServerResponse) => {
-  const userId = req.url!.split('/')[3];
+  const userId = getUserIdFromUrl(req.url);
+
+  if (!userId) {
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
+    return;
+  }
 
   if (!validate(userId)) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
-    res.end();
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: `Invalid userId: ${userId}` });
     return;
   }
 
   const user = userService.getUser(userId);
 
   if (user) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(user));
-    res.end();
+    sendResponse(res, StatusCode.OK, user);
   } else {
-    res.statusCode = 404;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify({ message: `User with id ${userId} not found` }));
-    res.end();
+    sendResponse(res, StatusCode.NOT_FOUND, { message: `User with id ${userId} not found` });
   }
 };
 
-export const createUser = (req: IncomingMessage, res: ServerResponse) => {
-  let body = '';
-
-  req.on('data', (chunk) => {
-    body += chunk;
-  });
-
-  req.on('end', () => {
-    const parsedBody = JSON.parse(body);
-    const { username, age, hobbies } = parsedBody;
+export const createUser = async (req: IncomingMessage, res: ServerResponse) => {
+  try {
+    const requestBody = await parseRequestBody(req);
+    const { username, age, hobbies } = requestBody;
 
     if (!username || !age || !hobbies) {
-      res.statusCode = 400;
-      res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
-      res.end();
+      sendResponse(res, StatusCode.BAD_REQUEST, {
+        message: 'Request body must contain username, age, and hobbies',
+      });
       return;
     }
 
@@ -65,87 +53,73 @@ export const createUser = (req: IncomingMessage, res: ServerResponse) => {
 
     const createdUser = userService.createUser(newUser);
 
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(createdUser));
-    res.end();
-  });
+    sendResponse(res, StatusCode.OK, createdUser);
+  } catch (error) {
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request body' });
+  }
 };
 
-export const updateUser = (req: IncomingMessage, res: ServerResponse) => {
-  const userId = req.url!.split('/')[3];
+export const updateUser = async (req: IncomingMessage, res: ServerResponse) => {
+  try {
+    const userId = getUserIdFromUrl(req.url);
 
-  if (userService.getUser(userId)) {
-    if (!validate(userId)) {
-      res.statusCode = 400;
-      res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
-      res.end();
+    if (!userId) {
+      sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
       return;
     }
 
-    let body = '';
+    const user = userService.getUser(userId);
 
-    req.on('data', (chunk) => {
-      body += chunk;
-    });
+    if (!user) {
+      sendResponse(res, StatusCode.NOT_FOUND, { message: `User with id ${userId} not found` });
+      return;
+    }
 
-    req.on('end', () => {
-      const parsedBody = JSON.parse(body);
-      const { username, age, hobbies } = parsedBody;
+    const requestBody = await parseRequestBody(req);
+    const { username, age, hobbies } = requestBody;
 
-      if (!username || !age || !hobbies) {
-        res.statusCode = 400;
-        console.log('2222');
-        res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify({ message: 'Request body must contain username, age, and hobbies' }));
-        res.end();
-        return;
-      }
+    if (!username || !age || !hobbies) {
+      sendResponse(res, StatusCode.BAD_REQUEST, {
+        message: 'Request body must contain username, age, and hobbies',
+      });
+      return;
+    }
 
-      const changes: Partial<User> = {
-        username: username,
-        age: age,
-        hobbies: hobbies,
-      };
+    const changes: Partial<User> = {
+      username,
+      age,
+      hobbies,
+    };
 
-      const updatedUser = userService.updateUser(userId, changes);
+    const updatedUser = userService.updateUser(userId, changes);
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify(updatedUser));
-      res.end();
-    });
-  } else {
-    res.statusCode = 404;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify({ message: `User with id ${userId} not found` }));
-    res.end();
+    sendResponse(res, StatusCode.OK, updatedUser);
+  } catch (error) {
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request body' });
   }
 };
 
 export const deleteUser = (req: IncomingMessage, res: ServerResponse) => {
-  const userId = req.url!.split('/')[3];
+  const userId = getUserIdFromUrl(req.url);
 
-  if (userService.getUser(userId)) {
-    if (!validate(userId)) {
-      res.statusCode = 400;
-      res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify({ message: `Invalid userId: ${userId}` }));
-      res.end();
-      return;
-    }
-
-    userService.deleteUser(userId);
-
-    res.statusCode = 204;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify({ message: `User ${userId} deleted successfully` }));
-    res.end();
-  } else {
-    res.statusCode = 404;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify({ message: `User with id ${userId} not found` }));
-    res.end();
+  if (!userId) {
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: 'Invalid request URL' });
+    return;
   }
+
+  if (!validate(userId)) {
+    sendResponse(res, StatusCode.BAD_REQUEST, { message: `Invalid userId: ${userId}` });
+    return;
+  }
+
+  const user = userService.getUser(userId);
+
+  if (!user) {
+    sendResponse(res, StatusCode.NOT_FOUND, { message: `User with id ${userId} not found` });
+    return;
+  }
+
+  userService.deleteUser(userId);
+
+  sendResponse(res, StatusCode.OK, { message: `User ${userId} deleted successfully` });
 };
