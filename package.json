@@ -10,7 +10,7 @@
     "prettier:check": "prettier --check src/**/*.ts",
     "prettier:write": "prettier --write src/**/*.ts",
     "lint": "eslint . --ext .ts",
-    "test": "NODE_ENV=test jest"
+    "test": "jest"
   },
   "author": "Dzmitry Yarmoshkin",
   "license": "ISC",
