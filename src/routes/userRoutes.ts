@@ -2,7 +2,7 @@ import cluster from 'node:cluster';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import * as userController from '../controllers/userController';
 import { forwardRequest } from '../loadBalancer/forwardRequest';
-import { routeNotFound } from '../utils/utils';
+import { routeNotFound, sendResponse } from '../utils/utils';
 
 export const routes = (request: IncomingMessage, response: ServerResponse) => {
   try {
@@ -27,8 +27,7 @@ export const routes = (request: IncomingMessage, response: ServerResponse) => {
         routeNotFound(request, response);
     }
   } catch (err) {
-    response.writeHead(500, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify({ message: `Internal Server Error: ${(err as Error).message}` }));
+    sendResponse(response, 500, { message: `Internal Server Error: ${(err as Error).message}` });
   }
 };
 
