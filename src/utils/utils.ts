@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
-import { StatusCode } from '../types';
 import { User } from '../models/userModel';
+import { ErrorMessages, StatusCode } from '../types';
 
 export const routeNotFound = (request: IncomingMessage, response: ServerResponse) => {
   response.statusCode = 404;
@@ -37,4 +37,36 @@ export const parseRequestBody = (req: IncomingMessage): Promise<User> => {
 
 export const getUserIdFromUrl = (url?: string) => {
   return url?.split('/')[3] || null;
+};
+
+export const isFieldsValid = (username: string, age: number, hobbies: string[], res: ServerResponse) => {
+  if (!username || !age || !hobbies) {
+    sendResponse(res, StatusCode.BAD_REQUEST, {
+      message: ErrorMessages.MissingFields,
+    });
+    return false;
+  }
+
+  if (typeof username !== 'string' || !username.trim()) {
+    sendResponse(res, StatusCode.BAD_REQUEST, {
+      message: ErrorMessages.InvalidUsername,
+    });
+    return false;
+  }
+
+  if (typeof age !== 'number') {
+    sendResponse(res, StatusCode.BAD_REQUEST, {
+      message: ErrorMessages.InvalidAge,
+    });
+    return false;
+  }
+
+  if (!Array.isArray(hobbies) || !hobbies.every((hobby) => typeof hobby === 'string')) {
+    sendResponse(res, StatusCode.BAD_REQUEST, {
+      message: ErrorMessages.InvalidHobbies,
+    });
+    return false;
+  }
+
+  return true;
 };

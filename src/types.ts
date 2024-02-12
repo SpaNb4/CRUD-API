@@ -20,4 +20,7 @@ export enum ErrorMessages {
   InvalidUserId = 'Invalid user ID (Not a valid UUID)',
   UserNotFound = 'User not found',
   MissingFields = 'Request body must contain username, age, and hobbies',
+  InvalidUsername = 'Invalid username type, string expected',
+  InvalidAge = 'Invalid age type, number expected',
+  InvalidHobbies = 'Invalid hobbies, array of strings expected',
 }

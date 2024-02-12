@@ -3,7 +3,7 @@ import { validate } from 'uuid';
 import { User, UserWithoutId } from '../models/userModel';
 import * as userService from '../services/userService';
 import { ErrorMessages, StatusCode } from '../types';
-import { getUserIdFromUrl, parseRequestBody, sendResponse } from '../utils/utils';
+import { getUserIdFromUrl, isFieldsValid, parseRequestBody, sendResponse } from '../utils/utils';
 
 export const getUsers = (_req: IncomingMessage, res: ServerResponse) => {
   const users = userService.getUsers();
@@ -38,10 +38,7 @@ export const createUser = async (req: IncomingMessage, res: ServerResponse) => {
     const requestBody = await parseRequestBody(req);
     const { username, age, hobbies } = requestBody;
 
-    if (!username || !age || !hobbies) {
-      sendResponse(res, StatusCode.BAD_REQUEST, {
-        message: ErrorMessages.MissingFields,
-      });
+    if (!isFieldsValid(username, age, hobbies, res)) {
       return;
     }
 
@@ -83,10 +80,7 @@ export const updateUser = async (req: IncomingMessage, res: ServerResponse) => {
     const requestBody = await parseRequestBody(req);
     const { username, age, hobbies } = requestBody;
 
-    if (!username || !age || !hobbies) {
-      sendResponse(res, StatusCode.BAD_REQUEST, {
-        message: ErrorMessages.MissingFields,
-      });
+    if (!isFieldsValid(username, age, hobbies, res)) {
       return;
     }
 
