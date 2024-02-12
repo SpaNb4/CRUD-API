@@ -15,6 +15,7 @@ export enum HttpMethod {
 }
 
 export enum ErrorMessages {
+  InternalServerError = 'Internal Server Error',
   InvalidRequestUrl = 'Invalid request URL: No user ID provided',
   InvalidRequestBody = 'Invalid request body',
   InvalidUserId = 'Invalid user ID (Not a valid UUID)',
@@ -22,5 +23,5 @@ export enum ErrorMessages {
   MissingFields = 'Request body must contain username, age, and hobbies',
   InvalidUsername = 'Invalid username type, string expected',
   InvalidAge = 'Invalid age type, number expected',
-  InvalidHobbies = 'Invalid hobbies, array of strings expected',
+  InvalidHobbies = 'Invalid hobbies type, array of strings expected',
 }

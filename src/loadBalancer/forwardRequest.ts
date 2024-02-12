@@ -1,17 +1,19 @@
 import http, { IncomingMessage, RequestOptions, ServerResponse } from 'node:http';
+import { ErrorMessages, HttpMethod, StatusCode } from '../types';
+import { sendResponse } from '../utils/utils';
 import { numCPUs } from './cluster';
 import { LOAD_BALANCER_PORT } from './createServer';
-import { HttpMethod, StatusCode } from '../types';
-import { sendResponse } from '../utils/utils';
 
 let currentServerIndex = 1;
 
 export const forwardRequest = (req: IncomingMessage, res: ServerResponse) => {
-  console.log('Forwarding request to server', currentServerIndex);
+  const port = LOAD_BALANCER_PORT + currentServerIndex;
+
+  console.log(`Forwarding request to server ${currentServerIndex} on port ${port}`);
 
   const options: RequestOptions = {
     hostname: 'localhost',
-    port: LOAD_BALANCER_PORT + currentServerIndex,
+    port,
     path: req.url,
     method: req.method,
     headers: req.headers,
@@ -25,9 +27,10 @@ export const forwardRequest = (req: IncomingMessage, res: ServerResponse) => {
     responseFromServer.pipe(res);
   });
 
-  requestToServer.on('error', (error) => {
-    console.error('Error forwarding request:', error);
-    sendResponse(res, 500, { message: 'Server error!' });
+  requestToServer.on('error', (err) => {
+    sendResponse(res, StatusCode.INTERNAL_SERVER_ERROR, {
+      message: `${ErrorMessages.InternalServerError}: ${(err as Error).message}`,
+    });
   });
 
   if (req.method === HttpMethod.POST || req.method === HttpMethod.PUT) {

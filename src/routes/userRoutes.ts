@@ -2,6 +2,7 @@ import cluster from 'node:cluster';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import * as userController from '../controllers/userController';
 import { forwardRequest } from '../loadBalancer/forwardRequest';
+import { ErrorMessages, StatusCode } from '../types';
 import { routeNotFound, sendResponse } from '../utils/utils';
 
 export const routes = (request: IncomingMessage, response: ServerResponse) => {
@@ -27,7 +28,10 @@ export const routes = (request: IncomingMessage, response: ServerResponse) => {
         routeNotFound(request, response);
     }
   } catch (err) {
-    sendResponse(response, 500, { message: `Internal Server Error: ${(err as Error).message}` });
+    
+    sendResponse(response, StatusCode.INTERNAL_SERVER_ERROR, {
+      message: `${ErrorMessages.InternalServerError}: ${(err as Error).message}`,
+    });
   }
 };
 
